@@ -6,10 +6,10 @@
 # --- Required options --- #
 
 # Name of website
-title: My Website
+title: Blog
 
 # Your name to show in the footer
-author: Some Person
+author: Nour-Eddine ECH-CHEBABY
 
 # --- List of links in the navigation bar --- #
 
@@ -18,7 +18,7 @@ navbar-links:
   Resources:
     - Beautiful Jekyll: "https://beautifuljekyll.com"
     - Learn markdown: "https://www.markdowntutorial.com/"
-  Author's home: "https://deanattali.com"
+  Author's home: "https://chebaby.github.io"
 
 # --- Logo --- #
 
@@ -41,8 +41,8 @@ round-avatar: true
 social-network-links:
   email: "someone@example.com"
   facebook: deanattali
-  github: daattali
-  twitter: daattali
+  github: chebaby
+  twitter: __chebaby
   patreon: DeanAttali
   youtube: c/daattali
 #  reddit: yourname
