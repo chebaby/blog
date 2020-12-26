@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Building multilang show room gallery with laravel
+title: Building multilang show room gallery with laravel - part 1
 subtitle: Intro
 gh-repo: chebaby/blog
 gh-badge: [follow]
