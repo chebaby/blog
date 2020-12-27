@@ -43,6 +43,15 @@ layout: base
         {{ content }}
       </article>
 
+      <p class="box-warning">
+        {% assign create_at = page.date | date: "%Y-%m-%d" %}
+        <a href="https://github.com/chebaby/blog/blob/master/_posts/{{ create_at }}-{{ page.slug }}.md">
+          <strong>Help us improve this page!</strong>
+        </a> 
+        <br>
+        English is not my native language. If you would like to help improve the grammar and clarity of this post, your suggestions and contributions would be greatly appreciated. Thank you.
+      </p>
+
       {% if page.tags.size > 0 %}
         <div class="blog-tags">
           <span>Tags:</span>
