@@ -10,7 +10,7 @@ comments: true
 
 Before getting our hands dirty with database migrations, first let's list all possible table that we gon need to build our project, for that, here's some some basic business rules to guide us:
 
-Website is multilingual, with enlish and french as languages of choise.  
+Website is multilingual, Enlish and French as languages of choise.  
 Product belongs to one or many categories.  
 Categories could have many sub categories (deep to one level).  
 Category could have no parent or one parent at max.
@@ -22,7 +22,7 @@ The given rules above, could easly accomplished with these tables:
 * Products
 
 But, since this is a multilingual website, we gon to need other tables to store localized fields. For that I plan to use 
-[mcamara/laravel-localization](https://github.com/mcamara/laravel-localization) package. This package, as the you can read on the ReadMe, offers the following:
+[mcamara/laravel-localization](https://github.com/mcamara/laravel-localization) package. This package offers the following:
 
 * Detect language from browser
 * Smart redirects (Save locale in session/cookie)
@@ -32,7 +32,7 @@ But, since this is a multilingual website, we gon to need other tables to store 
 * Option to hide default locale in url
 * Many snippets and helpers (like language selector)
 
-With that in mind, we end up with this:
+With that in mind, we end up with these tables:
 
 * Artisans
 * Artisan Translations
@@ -46,4 +46,79 @@ I think this is enough to get the application up and running, other tables may b
 
 Notice that there is new table named "Prodcut Categories", that's the result of the many-to-many relationship between "Product" table and "Categories" table, more on that later.
 
+
 ## Migrations
+
+I find it easy to create migrations using the `php artisan make:model` command, because a table needs to be represented by an Eloquent model anyway, and I can also create a controller and a factory for the model by using the `--controller` and `--factory` options.  
+For more info display the help with one of those commands `php artisan help make:model` or `php artisan make:model --help`
+
+
+### Artisan
+
+```bash
+php artisan make:model Artisan --migration
+```
+---
+
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateArtisansTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('artisans', function (Blueprint $table) {
+            $table->id();
+            $table->string('first_name');
+            $table->string('last_name');
+            $table->string('email')->unique();
+            $table->char('gender', 1)->nullable();
+            $table->boolean('active')->default(true);
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('artisans');
+    }
+}
+```
+
+To keep the migrations as simple as possible I kept the fields at the bottom minimum , the migration it self is self-explanitory, the only thing I want to point out here is for _gender_ field, I intent to store it in char type with 1 character lenght, for that I will use `m` for male, and `f` for female.
+
+Next thing is "Artisan Translations" table, this table contains one localized field, it's _bio_
+
+Exactly like the first time, we are creating `ArtisanTranslations` model with the migration.
+
+```bash
+php artisan make:model ArtisanTranslations --migration
+```
+---
+
+```php
+public function up()
+{
+    Schema::create('artisan_translations', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('artisan_id')->constrained()->cascadeOnDelete();
+        $table->text('bio')->nullable();
+        $table->char('locale', 2)->index();
+        $table->unique(['artisan_id','locale']);
+    });
+}
+```
