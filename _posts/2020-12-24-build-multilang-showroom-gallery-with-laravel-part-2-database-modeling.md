@@ -8,14 +8,14 @@ tags: [laravel, database]
 comments: true
 ---
 
-Before getting our hands dirty with database migrations, first let's list all possible table that we gon need to build our project, for that, here's some some basic business rules to guide us:
+Before getting our hands dirty with database migrations, let's take a moment and think about what kind of tables we need to achieve our goal. Diving in database modeling techniques and advanced database design falls outside the scope of this article, but, here’s some basic business rules to get us start with our modelization:
 
-Website is multilingual, Enlish and French as languages of choise.  
-Product belongs to one or many categories.  
-Categories could have many sub categories (deep to one level).  
-Category could have no parent or one parent at max.
+_Website is multilingual, Enlish and French as languages of choise._  
+_Product belongs to one or many categories._  
+_Categories could have many sub categories (deep to one level)._  
+_Category could have no parent or one parent at max._
 
-The given rules above, could easly accomplished with these tables:
+I always prefer to define the most important entities just to get the ball rolling. The given rules above, could easly accomplished with these tables:
 
 * Artisans
 * Categories
@@ -44,7 +44,7 @@ With that in mind, we end up with these tables:
 
 I think this is enough to get the application up and running, other tables may be added along the way as needed, but let's keep it simple for the time been.
 
-Notice that there is new table named "Prodcut Categories", that's the result of the many-to-many relationship between "Product" table and "Categories" table, more on that later.
+Notice that there is new table named _"Prodcut Categories"_, that's the result of the `many-to-many` relationship between _"Product"_ table and _"Categories"_ table, more on that later.
 
 
 ## Migrations
@@ -99,9 +99,9 @@ class CreateArtisansTable extends Migration
 }
 ```
 
-To keep the migrations as simple as possible I kept the fields at the bottom minimum , the migration it self is self-explanitory, the only thing I want to point out here is for _gender_ field, I intent to store it in char type with 1 character lenght, for that I will use `m` for male, and `f` for female.
+To keep the migrations as simple as possible I kept the fields at the bottom minimum , the migration it self is self-explanitory, the only thing I want to point out here is for _gender_ field, I intent to store it in char type with 1 character lenght, so I can use `m` for male, and `f` for female.
 
-Next thing is "Artisan Translations" table, this table contains one localized field, it's _bio_
+Next thing is "Artisan Translations" table, this table contains one localized field, it's _bio_.
 
 Exactly like the first time, we are creating `ArtisanTranslations` model with the migration.
 
