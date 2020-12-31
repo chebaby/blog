@@ -15,22 +15,15 @@ _Product belongs to one or many categories._
 _Categories could have many sub categories (deep to one level)._  
 _Category could have no parent or one parent at max._
 
-I always prefer to define the most important entities just to get the ball rolling. The given rules above, could easly accomplished with these tables:
+I always prefer to define the most important entities just to get the ball rolling. The given rules above, could easly accomplished with these "core" tables:
 
 * Artisans
 * Categories
 * Products
 
-But, since this is a multilingual website, we gon to need other tables to store localized fields. For that I plan to use 
-[mcamara/laravel-localization](https://github.com/mcamara/laravel-localization) package. This package offers the following:
+But, since this is a multilingual website, we gon to need other tables to store localized fields.
 
-* Detect language from browser
-* Smart redirects (Save locale in session/cookie)
-* Smart routing (Define your routes only once, no matter how many languages you use)
-* Translatable Routes
-* Supports caching & testing
-* Option to hide default locale in url
-* Many snippets and helpers (like language selector)
+Laravel’s Eloquent ORM is a very powerful part of Laravel. Unfortunately, it doesn’t provide support for multilingual models out of the box. Adding that functionality isn’t that difficult with [astrotomic/laravel-translatable](https://github.com/Astrotomic/laravel-translatable) package. It's a Laravel package for translatable models. Its goal is to remove the complexity in retrieving and storing multilingual model instances. With this package you write less code, as the translations are being fetched/saved when you fetch/save your instance.
 
 With that in mind, we end up with these tables:
 
@@ -44,7 +37,7 @@ With that in mind, we end up with these tables:
 
 I think this is enough to get the application up and running, other tables may be added along the way as needed, but let's keep it simple for the time been.
 
-Notice that there is new table named _"Prodcut Categories"_, that's the result of the `many-to-many` relationship between _"Product"_ table and _"Categories"_ table, more on that later.
+Notice that there is new table named _"Prodcut Categories"_, that's the result of a `many-to-many` relationship between _"Product"_ table and _"Categories"_ table, more on that later.
 
 
 ## Migrations
@@ -99,7 +92,9 @@ class CreateArtisansTable extends Migration
 }
 ```
 
-To keep the migrations as simple as possible I kept the fields at the bottom minimum , the migration it self is self-explanitory, the only thing I want to point out here is for _gender_ field, I intent to store it in char type with 1 character lenght, so I can use `m` for male, and `f` for female.
+To keep the migrations as simple as possible I kept the fields at the bottom minimum , the migration it self is self-explanitory, the only thing I want to heighlight here is for the _gender_ field, I tent to store it in a Char type with 1 character lenght, so I can use `m` for male, and `f` for female.
+
+### ArtisanTranslations
 
 Next thing is "Artisan Translations" table, this table contains one localized field, it's _bio_.
 
@@ -122,3 +117,12 @@ public function up()
     });
 }
 ```
+
+Using this migration we don’t need to create extra fields when ower application needs to support an extra language.
+
+The foreign key with cascading deletes will make sure that when a record in the _artisans_ table gets deleted, it’s corresponding translations will be deleted as well.
+
+The _locale_ field is used to determine the language of the stored record.
+
+
+That's it for _Artisan_ migration
