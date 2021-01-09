@@ -109,4 +109,3 @@ The `put` method is used to store file contents on the disk.
 
 
 I did one more thing, I added `/config/app_settings.php` to `.gitignore` file.
-

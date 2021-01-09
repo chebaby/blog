@@ -42,7 +42,9 @@ public function relationLoaded($key)
 
 ## How this method benefited me
 
-Briefly, in one of my projects, I had two tables _"artisans"_, _"products"_ where artisans `hasMany` products, and product `belongs` to a an artisan, as you can see below.
+Briefly, in one of my projects, I had two tables _"artisans"_, _"products"_ where artisans `hasMany` products, and product `belongs` to one artisan, as you can see below.
+
+**Artisan model**
 
 ```php
 <?php
@@ -69,7 +71,7 @@ class Artisan extends Model
 }
 ```
 
----
+**Product model**
 
 ```php
 <?php
@@ -102,9 +104,9 @@ Now whenever I want to fetch an artisan with his products I do this:
 $artisan = Artisan::with(['products'])->get();
 ```
 
-In the project, the `Artisan` model has more relationships, but for simplicity purposes, I will only keep products relationship.
+In the project, the `Artisan` model has more relationships, but for simplicity purposes, I will only keep _products_ relationship.
 
-Later on, I frequently find my self eager loading only artisan's active produtcs. I got to accomplish that by passing an array of relationships to the `with` method where the array key is a relationship name (in our case _products_) and the array value is a closure that adds additional constraints to the eager loading query:
+Later on, I frequently find my self eager loading only artisan's active produtcs. I got to accomplish that by passing an array of relationships to the `with` method where the array key is a relationship name (in our case _products_) and the array value is a _closure_ that adds additional constraints to the eager loading query:
 
 ```php
 $artisan = Artisan::with(['products' => function ($query) {
@@ -113,6 +115,8 @@ $artisan = Artisan::with(['products' => function ($query) {
 ```
 
 So, I thought it may be a good idea to create `activeProducts` relationship in the `Artisan` model to make it more simple and clear. So I did.
+
+**Artisan model**
 
 ```php
 <?php
@@ -149,20 +153,38 @@ class Artisan extends Model
 }
 ```
 
-Now, without the need to pass a closure to `products` relationship to fetch artisan's active products, i can accomplish the same thing with just this:
+Now, without the need to pass a closure to `products` relationship to fetch artisan's active products, I can accomplish the same thing with just this:
 
  ```php
 $artisan = Artisan::with(['activeProducts'])->get();
 ```
 
-(wip)
+Until now everything seems to go smoothly, our code is simple and clear! So, where and when `relationLoaded` could possibly be of any help for us.
 
-Although this brings simplicity, but, it raises a problem
+Let me share with you my use case:
 
-sub views to show products
+In multiple different places of the application, there is a section where I had to show a random product for an _Artisan_.
 
-you need to know wich relationship is loaded, so you don't need to unneccery hit the database.
+```php
+$artisan->randomProduct();
+```
 
-relationLoaded to the rescue.
+Depending on the Controller, sometimes the eager loaded relationship is _products_ and other times it's _activeProducts_ relationship. So, the necessity of knowing which relationship was loaded has raised.
 
-now with this i can use the same sub view for both where model is loaded with `products`  or `activeProducts`
+## relationLoaded to the rescue
+
+**Artisan model**
+
+```php
+/**
+* Get random product
+*
+* @return mixed
+*/
+public function randomProduct()
+{
+    $products = $this->relationLoaded('products') ? 'products' : 'activeProducts';
+
+    return $this->{$products}->isNotEmpty() ? $this->{$products}->random() : null;
+}
+```
