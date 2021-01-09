@@ -1,9 +1,23 @@
-.box-warning.ask-to-improve-grammer {
-	font-size: 1rem;
-    font-style: italic;
-    font-family: 'Open Sans';
+h2 {
+    margin-top: 4rem;
+    margin-bottom: 2rem;
+}
+
+h4 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
 }
 
 em {
 	font-family: 'Open Sans';
+}
+
+.open-sans {
+    font-family: 'Open Sans';
+}
+
+.box-warning.ask-to-improve-grammer {
+	font-size: 1rem;
+    font-style: italic;
+    font-family: 'Open Sans';
 }

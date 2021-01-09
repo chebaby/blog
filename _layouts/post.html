@@ -41,15 +41,24 @@ layout: base
 
       <article role="main" class="blog-post">
         {{ content }}
+
+        <br>
       </article>
+
+      <hr>
+
+      <p class="open-sans">
+        If you have any questions or feedback, please get in touch. 
+        You can reach me on Twitter <a href="https://twitter.com/{{ site.social-network-links.twitter }}">@{{ site.social-network-links.twitter }}</a>
+      </p>
 
       <p class="box-warning ask-to-improve-grammer">
         {% assign create_at = page.date | date: "%Y-%m-%d" %}
-        <a href="https://github.com/chebaby/blog/blob/master/_posts/{{ create_at }}-{{ page.slug }}.md">
+        English is not my native language. If you would like to help improve the grammar and clarity of this post, your suggestions and contributions would be greatly appreciated. Thank you.
+        <br>
+        <a href="https://github.com/chebaby/blog/blob/master/_posts/{{ create_at }}-{{ page.slug }}.md" target="_blank"
           <strong>Help us improve this page!</strong>
         </a> 
-        <br>
-        English is not my native language. If you would like to help improve the grammar and clarity of this post, your suggestions and contributions would be greatly appreciated. Thank you.
       </p>
 
       {% if page.tags.size > 0 %}
