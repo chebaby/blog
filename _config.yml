@@ -14,7 +14,7 @@ author: Nour-Eddine ECH-CHEBABY
 # --- List of links in the navigation bar --- #
 
 navbar-links:
-  Author's home: "https://chebaby.github.io"
+  Author's home: "https://echebaby.com"
 
 # --- Logo --- #
 
@@ -70,7 +70,7 @@ share-links-active:
 
 # How to display the link to your website in the footer
 # Remove this if you don't want a link in the footer
-url-pretty: "https://chebaby.github.io"
+url-pretty: "https://echebaby.com"
 
 # Excerpt word length - Truncate the excerpt of each post on the feed page to the specified number of words
 excerpt_length: 50
@@ -120,7 +120,7 @@ site-css:
 # --- Web Analytics Section --- #
 
 # Fill in your Google Analytics gtag.js ID to track your website using gtag
-gtag: "G-FMC7DHCBQ1"
+gtag: "G-S1BPN9NJ8J"
 
 # Fill in your Google Analytics ID to track your website using Google Analytics
 #google_analytics: ""
