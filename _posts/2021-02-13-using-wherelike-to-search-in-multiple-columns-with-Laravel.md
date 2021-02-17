@@ -30,12 +30,12 @@ class User extends Model
 
 #### snippet 1
 ```php
-User::search('searchTerm', ['column1', 'column2'])->get();
+User::search('searchTerm', ['name', 'email'])->get();
 
 /**
  * SELECT * FROM `users` 
- *     WHERE `column1` LIKE '%searchTerm%' 
- *     OR `column2` LIKE '%searchTerm%'
+ *     WHERE `name` LIKE '%searchTerm%' 
+ *     OR `email` LIKE '%searchTerm%'
  */
 ``` 
 
@@ -44,12 +44,12 @@ With that in mind, the above snippet could easily be written like below and stil
 
 #### snippet 2
 ```php
-User::search(['column1', 'column2'], 'searchTerm')->get();
+User::search(['name', 'email'], 'searchTerm')->get();
 
 /**
  * SELECT * FROM `users` 
- *     WHERE `column1` LIKE '%searchTerm%' 
- *     OR `column2` LIKE '%searchTerm%'
+ *     WHERE `name` LIKE '%searchTerm%' 
+ *     OR `email` LIKE '%searchTerm%'
  */
 ``` 
 
@@ -64,7 +64,7 @@ class User extends Model
      *
      * @return string[]
      */
-    public $searchable = ['column1', 'column2'];
+    public $searchable = ['name', 'email'];
 
     // OR
 
@@ -75,7 +75,7 @@ class User extends Model
      */
     public static function searchable()
     {
-        return ['column1', 'column2'];
+        return ['name', 'email'];
     }
 }
 
@@ -85,8 +85,8 @@ User::search('searchTerm')->get();
 
 /**
  * SELECT * FROM `users` 
- *     WHERE `column1` LIKE '%searchTerm%' 
- *     OR `column2` LIKE '%searchTerm%'
+ *     WHERE `name` LIKE '%searchTerm%' 
+ *     OR `email` LIKE '%searchTerm%'
  */
 ``` 
 
@@ -98,14 +98,38 @@ User::search()->get();
 
 /**
  * SELECT * FROM `users` 
- *     WHERE `column1` LIKE '%searchTerm%' 
- *     OR `column2` LIKE '%searchTerm%'
+ *     WHERE `name` LIKE '%searchTerm%' 
+ *     OR `email` LIKE '%searchTerm%'
  */
 ``` 
 
 The last snippet works, because behind the scenes, we check if a specific query parameter is present in the `Request`, if it's the case we use it the get the *searchTerm*. And for the *attributes* we get them from `$searchable` property or `searchable` method.
 
+### Support for relations
+
+You can also search for attributes in related models.
+
+#### snippet 5
+```php
+User::search('searchTerm', ['name', 'country.name'])->get();
+
+/**
+ * SELECT * FROM `users` 
+ * WHERE (
+ *    `name` LIKE '%searchTerm%' OR 
+ *    EXISTS (
+ *        SELECT * FROM `countries` WHERE `users`.`country_id` = `countries`.`id` 
+ *        AND `name` LIKE '%searchTerm%'
+ *    )
+ *)
+ */
+``` 
+
+As you can conclude from the generated SQL, we are looking for users with name contains *searchTerm* `OR` users with country name contains *searchTerm*. 
+
 By this far, I hope this opens your appetite to follow along with me to implement this feature.
+
+## Implementation
 
 I will start by creating `Searchable` trait, I usually keep the model's traits inside `App\Concerns\Models` namespace, but this just a personal preference, you can put it wherever you think suits your project the best.
 
@@ -128,3 +152,99 @@ trait Searchable
     }
 }
 ```
+
+By now you know that there is two **optional** arguments we can pass to search scope, a *$searchTerm* `string` and an `array` of *$attributes*.  
+While `$query` argument is always present as it's passed by *Laravel Query Builder*.
+
+It seems that we should first parse search scope arguments, for that reason I created `parseArguments` method to helps us out with the parsing.
+
+```php
+<?php
+
+namespace App\Concerns\Models;
+
+trait Searchable
+{
+    /**
+     * Scope a query to search for term in the attributes
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected function scopeSearch($query)
+    {
+        [$searchTerm, $attributes] = $this->parseArguments(func_get_args());
+    }
+
+    /**
+     * Parse search scope arguments
+     *
+     * @param array $arguments
+     * @return array
+     */
+    private function parseArguments(array $arguments)
+    {
+        // parsing...
+    }
+}
+```
+
+`func_get_args` gets an array of the function's argument list. In our case it's a list of argument passed to *scopeSearch* which are *$query* `Builder`, *$searchTerm* `string` and *$attributes* `array`.
+
+I paste `parseArguments` definition, and I will explain what I think should be clarified.
+
+```php
+<?php
+    //...
+    
+    /**
+     * Parse search scope arguments
+     *
+     * @param array $arguments
+     * @return array
+     */
+    private function parseArguments(array $arguments)
+    {
+        $args_count = count($arguments);
+
+        switch ($args_count) {
+            case 1:
+                return [request(config('searchable.key')), $this->searchableAttributes()];
+                break;
+
+            case 2:
+                return is_string($arguments[1])
+                    ? [$arguments[1], $this->searchableAttributes()]
+                    : [request(config('searchable.key')), $arguments[1]];
+                break;
+
+            case 3:
+                return is_string($arguments[1])
+                    ? [$arguments[1], $arguments[2]]
+                    : [$arguments[2], $arguments[1]];
+                break;
+
+            default:
+                return [null, []];
+                break;
+        }
+    }
+
+    /**
+     * Get searchable columns
+     *
+     * @return array
+     */
+    public function searchableAttributes()
+    {
+        if (method_exists($this, 'searchable')) {
+            return $this->searchable();
+        }
+
+        return property_exists($this, 'searchable') ? $this->searchable : [];
+    }
+```
+
+First we count how many arguments passed to the search scope. The number of arguments is important here as it's gon tell us how our scope is been used.
+
+One thing to note, is that the `$args_count` will never be `0` because *$query* `Builder` is always passed by Laravel as the first argument. Which also means, obviously, it is the argument at index 0 of `$arguments` array.
