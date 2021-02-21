@@ -91,9 +91,25 @@ User::search('searchTerm')->get();
  */
 ``` 
 
-Or maybe you don't want to pass any arguments at all.
+Or maybe you only want to pass *attributes*, and let the "magic" guess for the *searchTerm*, as I'm going to explain in a second, that's possible too.
 
 #### snippet 4
+```php
+User::search(['name', 'email', 'phone'])->get();
+
+/**
+ * SELECT * FROM `users` 
+ *     WHERE `name` LIKE '%searchTerm%' 
+ *     OR `email` LIKE '%searchTerm%'
+ *     OR `phone` LIKE '%searchTerm%'
+ */
+``` 
+
+The last snippets works, because behind the scenes, I check if a specific query parameter key is present in the `Request`, if it's the case I use it the get the *searchTerm*.
+
+What about the case where you don't want to pass any arguments at all. Well, that works too.
+
+#### snippet 5
 ```php
 User::search()->get();
 
@@ -104,13 +120,12 @@ User::search()->get();
  */
 ``` 
 
-The last snippet works, because behind the scenes, I check if a specific query parameter is present in the `Request`, if it's the case we use it the get the *searchTerm*. And for the *attributes* we get them from `$searchable` property or `searchable` method.
 
 ### Support for relations
 
 You can also search for attributes in related models.
 
-#### snippet 5
+#### snippet 6
 ```php
 User::search('searchTerm', ['name', 'country.name'])->get();
 
@@ -132,7 +147,7 @@ By this far, I hope this opens your appetite to follow along with me to implemen
 
 ## Implementation
 
-I will start by creating `Searchable` trait, I usually keep the model's traits inside `App\Concerns\Models` namespace, but this just a personal preference, you can put it wherever you think suits your project the best.
+I will start by creating `Searchable` trait, I usually keep the model's traits in the `App\Concerns\Models` namespace, but this just a personal preference, you can put it wherever you think suits your project the best.
 
 ```php
 <?php
@@ -157,7 +172,7 @@ trait Searchable
 By now you know that there is two **optional** arguments we can pass to search scope, a *$searchTerm* `string` and an `array` of *$attributes*.  
 While `$query` argument is always present as it's passed by *Laravel Query Builder*.
 
-It seems that we should first parse search scope arguments, for that reason I created `parseArguments` method to helps us out with the parsing.
+It seems to me that I should first parse search scope arguments, for that reason I created `parseArguments` method to helps us out with the parsing.
 
 ```php
 <?php
@@ -257,7 +272,7 @@ One thing to note, is that the value of `$args_count` will never be `0` (that's 
 
 Ok, let's break it down case by case.
 
-#### case 1 <sub><sup>Correspond to [snippet 4](#snippet-4)</sup></sub>
+#### case 1 <sub><sup>Correspond to [snippet 5](#snippet-5)</sup></sub>
 
 ```php
 case 1:
@@ -269,17 +284,23 @@ In this case, no arguments are passed to search scope, so it's up to us get the 
 
 Let us take a closer look at `request(config('searchable.key'))`. As a Laravel user you know, as the name implies, that [config](https://laravel.com/docs/8.x/helpers#method-config) access a value in a config file using the "dot" syntax, which includes the name of the file and the option you wish to access.
 
-So, in `config/searchable.php`
+So, to get the query parameter key that presumably holds your *searchTerm* value, you need to have configuration `searchable.php` file in `config` directory.
 
 ```php
 return [
-    // query key
+    // query parameter key
     // e.g http://example.com/search?q=searchTerm
     'key' => 'q',
 ];
 ```
 
+In this example, the query parameter key to use to get *searchTerm* value is **q**, so as long as you `Request` has <ins>filled</ins> **q** parameter you're good to go.
+
+
+#### case 2
+
 **To be continued...**
+
 
 
 
