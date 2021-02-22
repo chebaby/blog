@@ -263,16 +263,15 @@ Here is the entire `parseArguments` definition alongside the `searchableAttribut
     }
 ```
 
-`searchableAttributes` main job is to get searchable attributes array difined in the model *(e.g: User)*. It's used in the case where the **$attributes** argument is not provided in search scope *(see snippet 3 and 4)*.  
-`searchableAttributes` first looks for a method in the model named *searchable* if it exist, if so, it returns the result, if not, it looks for a property named *$searchable*, again if it exist it returns it's content, if not, an empty array is returned instead.
+`searchableAttributes` main job is to get searchable attributes array difined in the model *(e.g: User)*. It's used in the case where the **$attributes** argument is not provided in search scope *(see snippet [3](#snippet-3) and [5](#snippet-5))*. `searchableAttributes` first looks for a method in the model named *searchable* if it exist, if so, it returns the result, if not, it looks for a property named *$searchable*, again if it exist it returns it's content, if not, an empty array is returned instead.
 
 For `parseArguments` first we count how many arguments passed to the search scope. The number of arguments is important here as it will tell us how our scope is been used *(see the [usage](#usage) section)*.
 
-One thing to note, is that the value of `$args_count` will never be `0` (that's why you won't find a `case` statement for `0` in the `switch`) because *$query* `Builder` is always passed by Laravel as the first argument, which also means, it is the argument at index 0 of `$arguments` array.
+One thing to note is that the value of `$args_count` will never be `0` (that's why you won't find a `case` statement for `0` in the `switch`) because *$query* `Builder` is always passed by Laravel as the first argument, which also means, it is the argument at index 0 of `$arguments` array.
 
 Ok, let's break it down case by case.
 
-#### case 1 <sub><sup>Correspond to [snippet 5](#snippet-5)</sup></sub>
+#### case 1
 
 ```php
 case 1:
@@ -280,11 +279,11 @@ case 1:
     break;
 ```
 
-In this case, no arguments are passed to search scope, so it's up to us get the *searchTerm* from the `Request` and the *attributes* from the `Model`.
+Correspond to [snippet 5](#snippet-5). In this case, no arguments are passed to search scope, so it's up to us get the *searchTerm* from the `Request` and the *attributes* from the `Model`.
 
-Let us take a closer look at `request(config('searchable.key'))`. As a Laravel user you know, as the name implies, that [config](https://laravel.com/docs/8.x/helpers#method-config) access a value in a config file using the "dot" syntax, which includes the name of the file and the option you wish to access.
+Let's take a closer look at `request(config('searchable.key'))`. As a Laravel user you know, as the name implies, that [config](https://laravel.com/docs/8.x/helpers#method-config) access a value in a config file using the "dot" syntax, which includes the name of the file and the option you wish to access.
 
-So, to get the query parameter key that presumably holds your *searchTerm* value, you need to have configuration `searchable.php` file in `config` directory.
+So, to get the query parameter key that presumably holds your *searchTerm* value, you need to have configuration file (`searchable.php`) in `config` directory.
 
 ```php
 return [
@@ -294,10 +293,21 @@ return [
 ];
 ```
 
-In this example, the query parameter key to use to get *searchTerm* value is **q**, so as long as you `Request` has <ins>filled</ins> **q** parameter you're good to go.
+In this example, the query parameter key that will be used to get *searchTerm* value is **q**, so as long as you `Request` has <ins>filled</ins> **q** parameter you're good to go.
 
 
 #### case 2
+
+```php
+case 2:
+    return is_string($arguments[1])
+        ? [$arguments[1], $this->searchableAttributes()]
+        : [request(config('searchable.key')), $arguments[1]];
+    break;
+```
+
+Correspond to [snippet 3](#snippet-3) **OR** [snippet 4](#snippet-4). In this case, either *$searchTerm* `string` or *$attributes* `array` alongside *$query* `Builder` are passed to the search scope. this convention of string/array make easy for us to distinguich what type of argument is passed to the search scope.
+
 
 **To be continued...**
 
