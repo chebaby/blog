@@ -306,7 +306,28 @@ case 2:
     break;
 ```
 
-Correspond to [snippet 3](#snippet-3) **OR** [snippet 4](#snippet-4). In this case, either *$searchTerm* `string` or *$attributes* `array` alongside *$query* `Builder` are passed to the search scope. this convention of string/array make easy for us to distinguich what type of argument is passed to the search scope.
+Correspond to [snippet 3](#snippet-3) *OR* [snippet 4](#snippet-4). In this case, either *$searchTerm* `string` *OR* *$attributes* `array` alongside *$query* `Builder` are passed to the search scope. this convention of string/array make easy for us to distinguich what type of argument is passed to the search scope.
+
+So, if it's the *$searchTerm* `string` we get the *$attributes* `array` by involking searchableAttrbutes method, else it's the *$attributes* `array` we get the *$searchTerm* from `Request` using configured query parameter key.
+
+
+#### case 3
+
+```php
+case 3:
+    return is_string($arguments[1])
+        ? [$arguments[1], $arguments[2]]
+        : [$arguments[2], $arguments[1]];
+    break;
+```
+
+Correspond to [snippet 1](#snippet-1) *OR* [snippet 2](#snippet-2) *OR* [snippet 6](#snippet-6). both *$searchTerm* **and**
+*$attributes* are present as arguements to our search scope, regardless of theire order.  
+We make sure the order of arguments in the returned array is as expected: `[string $searchTerm, array $attributes]`.
+
+After argument parsing, the logical next step is to build the query, and it's exaclty what we are going to do next.
+
+### Build the query
 
 
 **To be continued...**
