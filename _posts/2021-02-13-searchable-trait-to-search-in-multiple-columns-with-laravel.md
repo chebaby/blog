@@ -5,6 +5,7 @@ gh-repo: chebaby/blog
 gh-badge: [follow]
 tags: [laravel, eloquent]
 comments: false
+head-extra: article_structured_data.html
 ---
 
 For a project I’m working on, I find myself performing a search query against multiple Eloquent models, where I search for a **term** in <ins>multiple</ins> and <ins>different</ins> attributes within each Model.

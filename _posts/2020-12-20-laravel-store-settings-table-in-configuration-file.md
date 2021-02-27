@@ -5,6 +5,7 @@ gh-repo: chebaby/blog
 gh-badge: [follow]
 tags: [laravel]
 comments: false
+head-extra: article_structured_data.html
 ---
 
 If you find yourself in a situation where you need to store settings table in a configuration file, but in the same time you don't want to sacrifice given the User/Admin the ability to update those settings when needed, then you've come to the right place.

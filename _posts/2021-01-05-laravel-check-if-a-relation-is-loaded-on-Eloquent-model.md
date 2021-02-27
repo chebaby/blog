@@ -5,6 +5,7 @@ gh-repo: chebaby/blog
 gh-badge: [follow]
 tags: [laravel, eloquent]
 comments: false
+head-extra: article_structured_data.html
 ---
 
 ## TL;DR
