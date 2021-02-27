@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Searchable trait to search in multiple columns with Laravel
+share-description: I will share with you my experience with the approach I chose to improve the readability and the reusability of my search functionality through a trait I named Searchable.
 gh-repo: chebaby/blog
 gh-badge: [follow]
 tags: [laravel, eloquent]

@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Store settings table in a configuration file
+share-description: I explain how you can store settings table in a Laravel configuration file without sacrificing given the Admin (for example) the ability to update those settings when needed.
 gh-repo: chebaby/blog
 gh-badge: [follow]
 tags: [laravel]

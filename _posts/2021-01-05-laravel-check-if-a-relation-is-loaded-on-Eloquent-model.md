@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Laravel check if a relation is loaded on Eloquent model
+share-description: I will show you how to check if a relation is loaded on Laravel Eloquent Model or not. I'm also including my own experience and how this technique came handy to me.
 gh-repo: chebaby/blog
 gh-badge: [follow]
 tags: [laravel, eloquent]
