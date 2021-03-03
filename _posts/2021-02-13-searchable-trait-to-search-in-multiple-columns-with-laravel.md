@@ -19,7 +19,7 @@ The second approach, is to use *Local Query Scope*. Local scopes allow you to de
 
 In this post, I will share with you my experience with the approach I chose to improve the readability and the reusability of my search functionality through a `trait` I named `Searchable`.
 
-But before getting to the "real stuff", here is some use cases.
+
 
 ## Usage
 
