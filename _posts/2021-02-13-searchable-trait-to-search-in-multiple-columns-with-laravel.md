@@ -483,7 +483,7 @@ trait Searchable
 ```
 
 
-### Resources
+### References
 
 * [Searching models using a where like query in Laravel](https://freek.dev/1182-searching-models-using-a-where-like-query-in-laravel){:target="_blank"}
 
