@@ -430,3 +430,5 @@ public function it_can_search_in_multiple_attributes_without_passing_a_term()
 #### Testing snippet 4 - result
 
 <img src="{{ 'assets/img/laravel-searchable-package/laravel-searchable-tests-snippet-4.png' | relative_url }}" alt="Laravel Searchable Package - testing snippet 4" />
+
+## ...To be continued
