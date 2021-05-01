@@ -9,13 +9,13 @@ comments: false
 head-extra: article_structured_data.html
 ---
 
-For a project I’m working on, I find myself performing a search query against multiple Eloquent models, where I search for a **term** in <ins>multiple</ins> and <ins>different</ins> attributes within each Model.
+For the project I’m working on, I find myself performing a search query against multiple Eloquent models, where I search for a **term** in <ins>multiple</ins> and <ins>different</ins> attributes within each Model.
 
 There is going to be many ways to solve this, I'm sure. But, as far as I can see, there are two practical approaches to tackle this.
 
 The first would be to extend the *Eloquent Query Builder* using `macros`. macros will let you add the search feature to **ALL** your Models. If this sounds like what you're looking for, then [Freek Van der Herten](https://twitter.com/freekmurze){:target="_blank"} got your back, Freek has a great [blog post](https://freek.dev/1182-searching-models-using-a-where-like-query-in-laravel){:target="_blank"} explaining this approach. As a matter of fact, this blog post is highly based on his approach.
 
-The second approach, is to use *Local Query Scope*. Local scopes allow you to define **common** sets of **query constraints** that you may easily **re-use** throughout your application. And to make it even more *re-usable* I'm wrapping the **search scope** inside a `trait` so it's easy to apply to every Model we want to make <ins>searchable</ins>.
+The second approach is to use *Local Query Scope*. Local scopes allow you to define **common** sets of **query constraints** that you may easily **re-use** throughout your application. And to make it even more *re-usable* I'm wrapping the **search scope** inside a `trait` so it's easy to apply to every Model we want to make <ins>searchable</ins>.
 
 In this post, I will share with you my experience with the approach I chose to improve the readability and the reusability of my search functionality through a `trait` I named `Searchable`.
 
@@ -54,7 +54,7 @@ User::search(['name', 'email'], 'searchTerm')->get();
  */
 ``` 
 
-Sometimes you may only want to pass *searchTerm* as the only argument, that's fine too. As long as your Model has, either a public `$searchable` property or a public `searchable` method returning an `array` of *attributes* you wish to perform the search against, everything is going to be fine.
+Sometimes you may only want to pass *searchTerm* as the only argument, that's fine too. As long as your Model has either a public `$searchable` property or a public `searchable` method returning an `array` of *attributes* you wish to perform the search against, everything is going to be fine.
 
 #### snippet 3
 ```php
@@ -93,7 +93,7 @@ User::search('searchTerm')->get();
  */
 ``` 
 
-Or maybe you only want to pass *attributes*, and let the "magic" guess for the *searchTerm*. As I'm going to explain in a second, that's possible too.
+Or maybe you only want to pass *attributes*, and let the "magic" guess for the *searchTerm*. As I'm going to explain next, that's possible too.
 
 #### snippet 4
 ```php
@@ -107,7 +107,7 @@ User::search(['name', 'email', 'phone'])->get();
  */
 ``` 
 
-The last snippets works, because behind the scenes, I check if a specific query parameter key is present in the `Request`, if it's the case I use it the get the *searchTerm*. More on that later.
+The last snippets works, because behind the scenes, I check if a specific query parameter key is present in the `Request`, if it's the case I use it to get the *searchTerm*. More to come later on.
 
 What about the case where you don't want to pass any arguments at all. Well, that works too.
 
@@ -150,7 +150,7 @@ By this far, I hope this opens your appetite to follow along with me to implemen
 
 ## Implementation
 
-I will start by creating `Searchable` trait, I usually keep the Model's traits in the `App\Concerns\Models` namespace, but this just a personal preference, you can put it wherever you think suits your project the best.
+I will start by creating `Searchable` trait, I usually keep the Model's traits in the `App\Concerns\Models` namespace, but this is just a personal preference, you can put it wherever you think suits your project the best.
 
 ```php
 <?php
@@ -172,7 +172,7 @@ trait Searchable
 }
 ```
 
-By now you know that there is two **optional** arguments we can pass to search scope, a *$searchTerm* `string` and an `array` of *$attributes*.  
+By now you know that there are two **optional** arguments we can pass to search scope, a *$searchTerm* `string` and an `array` of *$attributes*.  
 While `$query` argument is always present as it's passed by *Laravel Query Builder*.
 
 It seems to me that I should first parse search scope arguments, for that reason I created `parseArguments` method to handle the parsing.
@@ -266,9 +266,9 @@ Here is the entire `parseArguments` definition alongside the `searchableAttribut
     }
 ```
 
-`searchableAttributes` main job is to get searchable attributes array difined in the Model *(e.g: User)*. It's used in the case where the **$attributes** argument is not provided in search scope *(see snippet [3](#snippet-3) and [5](#snippet-5))*. `searchableAttributes` first looks for a method in the Model named *searchable* if it exist, if so, it returns the result, if not, it looks for a property named *$searchable*, again if it exist it returns it's content, if not, an empty array is returned instead.
+`searchableAttributes` main job is to get searchable attributes array difined in the Model *(e.g: User)*. It's used in the case where the **$attributes** argument is not provided in search scope *(see snippet [3](#snippet-3) and [5](#snippet-5))*. `searchableAttributes` first looks for a method in the Model named *searchable* if it exist. If it does, it returns the result. If it does not, it looks for a property named *$searchable*. Again if it exists it returns it's content, if does not, an empty array is returned instead.
 
-For `parseArguments` first we count how many arguments passed to the search scope. The number of arguments is important here as it will tell us how our scope is been used *(see the [usage](#usage) section)*.
+For `parseArguments`, first we count how many arguments passed to the search scope. The number of arguments is important here as it will tell us how our scope is been used *(see the [usage](#usage) section)*.
 
 One thing to note is that the value of `$args_count` will never be `0` (that's why you won't find a `case` statement for `0` in the `switch`) because *$query* `Builder` is always passed by Laravel as the first argument, which also means, it is the argument at index 0 of `$arguments` array.
 
@@ -309,7 +309,7 @@ case 2:
     break;
 ```
 
-Correspond to [snippet 3](#snippet-3) *OR* [snippet 4](#snippet-4). In this case, either *$searchTerm* `string` *OR* *$attributes* `array` alongside *$query* `Builder` are passed to the search scope. this convention of string/array make easy for us to distinguich what type of argument is passed to the search scope.
+Correspond to [snippet 3](#snippet-3) *OR* [snippet 4](#snippet-4). In this case, either *$searchTerm* `string` *OR* *$attributes* `array` alongside *$query* `Builder` are passed to the search scope. This convention of string/array makes it easy for us to distinguich what type of argument is passed to the search scope.
 
 So, if it's the *$searchTerm* `string` we get the *$attributes* `array` by involking `searchableAttributes` method, else, it's the *$attributes* `array` we get the *$searchTerm* from the `Request` by the configured query parameter key.
 
