@@ -12,9 +12,9 @@ head-extra: article_structured_data.html
 If you find yourself in a situation where you need to store settings table in a configuration file, but in the same time you don't want to sacrifice given the User/Admin the ability to update those settings when needed, then you've come to the right place.
 
 One of the reasons you may want to store your application settings in file is avoiding hitting the database too much.  
-Well, I faced this problem myself in one of the projects I worked on, it was a relatively a small project, storing my settings in a configuration file may not gain me too much in perfomance, but for my own peace of mind, I did it anyway.
+Well, I faced this problem myself in one of the projects I worked on. It was a relatively a small project. Storing my settings in a configuration file may not gain me too much in perfomance, but for my own peace of mind, I did it anyway.
 
-Here is schema defination of settings table:
+Here is schema definition of settings table:
 
 ```php
 <?php
@@ -54,9 +54,9 @@ class CreateSettingsTable extends Migration
 
 As you can see, it's `key => value` combination.
 
-Well the solution turns out to be pretty simple, all I had to do was taking adavantage of the [Eloquent Model Events](https://laravel.com/docs/8.x/eloquent#events), to be more precise I used `saved` event, because the `saving`/`saved` events will dispatch when a model is <u>created</u> or <u>updated</u>.
+Well, the solution turns out to be pretty simple, all I had to do was taking adavantage of the [Eloquent Model Events](https://laravel.com/docs/8.x/eloquent#events). To be more precise I used `saved` event, because the `saving`/`saved` events will dispatch when a model is <u>created</u> or <u>updated</u>.
 
->This is tested in Laravel 8 application, but i believe it will work fine from Laravel version 5.5 and up.
+>This is tested in Laravel 8 application, but I believe it will work well from Laravel version 5.5 and up.
 
 ```php
 <?php
@@ -101,7 +101,7 @@ class Setting extends Model
 }
 ```
 
-Nothing complexe really goin on here, first, through out the Eloquent `pluck` method we retrieve an `Illuminate\Support\Collection` instance containing the keys/values.  
+Nothing complex is really going on here. First, throughout the Eloquent `pluck` method we retrieve an `Illuminate\Support\Collection` instance containing the keys/values.  
 Chaining `toArray` method converts the collection into a plain PHP `array`.
 
 PHP function `var_export`returns a parsable string representation of the `$settings` variable.
