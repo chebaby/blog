@@ -104,7 +104,7 @@ class Setting extends Model
 Nothing complexe really goin on here, first, through out the Eloquent `pluck` method we retrieve an `Illuminate\Support\Collection` instance containing the keys/values.  
 Chaining `toArray` method converts the collection into a plain PHP `array`.
 
-PHP function `var_export`returns a parsable string representation of the `$settings` variable.
+PHP function `var_export` returns a parsable string representation of the `$settings` variable.
 
 I also use the `config_path` function to generate a _fully qualified path_ to a file within the application's configuration directory, a file I named **app_settings.php**. You are free to change it to whatever suits you best.  
 The `put` method is used to store file contents on the disk.
