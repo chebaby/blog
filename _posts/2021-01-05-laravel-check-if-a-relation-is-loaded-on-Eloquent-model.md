@@ -25,7 +25,7 @@ if ($model->relationLoaded('myRelation')) {
 
 #### How it works
 
-This Eloquent method, checks if the key _"myRelation"_ exists in the relations array of the Eloquent model, if it exists, wich means the realtionships is already been loaded, it returns `true`, otherwise, it returns `false`.
+This Eloquent method checks if the key _"myRelation"_ exists in the relations array of the Eloquent model. If it exists, which means the realtionships has already been loaded, it returns `true`, otherwise, it returns `false`.
 
 #### Function signature
 
