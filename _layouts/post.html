@@ -52,6 +52,7 @@ layout: base
         You can reach me on Twitter <a href="https://twitter.com/{{ site.social-network-links.twitter }}">@{{ site.social-network-links.twitter }}</a>
       </p>
 
+      {% comment %}
       <p class="box-warning ask-to-improve-grammer">
         {% assign create_at = page.date | date: "%Y-%m-%d" %}
         English is not my native language. If you would like to help improve the grammar and clarity of this post, your suggestions and contributions would be greatly appreciated. Thank you.
@@ -60,6 +61,7 @@ layout: base
           <strong>Help us improve this page!</strong>
         </a> 
       </p>
+      {% endcomment %}
 
       {% if page.tags.size > 0 %}
         <div class="blog-tags">
