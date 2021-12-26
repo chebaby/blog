@@ -9,7 +9,9 @@ comments: false
 head-extra: article_structured_data.html
 ---
 
-If you have to validate a request input as a boolean, and the input value is `'true'` or `'false'` (notice that I wrapped the values inside single quotes to indicate that those are actually strings) you would expect, *as I did*, that this will just work out of the box and Laravel validator will just see them as booleans. But that is not the case, instead, you will be hit by this beautiful error message `'The inputName field must be true or false.'`
+
+Every once in a while you come across a situation where you need to validate a request input as a boolean, and the input value is `'true'` or `'false'` (notice that I wrapped the values inside single quotes to indicate that those are actually strings). <br>
+You would expect, *as I did*, that this will just work out of the box and Laravel validator will just see them as booleans. But that is not the case, instead, you will be hit by this beautiful error message `'The inputName field must be true or false.'`
 
 To deeply understand why this is happening, let's go through an example, let's say that we have a form request that we call `PostRequest`.
 
@@ -49,12 +51,13 @@ class PostRequest extends FormRequest
 }
 ```
 
-`PostRequest` for simplicity purpose has a single request input that we need to validate as boolean, we will call that `is_published`, and let's say that `is_published` value coming to us from the client is `'true'` or `'false'` ...how can we handle this? 
+`PostRequest`, for simplicity purposes, has a single request input that we need to validate as boolean, we will call that `is_published`, and let's say that `is_published` value coming to us from the client is `'true'` or `'false'`. <br>
+At this point we already know that validation wouldn't pass, so, how can we handle this? 
 
 
 ## Beforehand
 
-Laravel boolean rule doesn't validate `'true'` and `'false'` a valid booleans, you can actually see that in `validateBoolean()` method located in `Illuminate/Validation/Concerns/ValidatesAttributes`.
+Laravel boolean rule doesn't validate `'true'` and `'false'` as valid booleans, we can actually see that in `validateBoolean()` method located in `Illuminate/Validation/Concerns/ValidatesAttributes`.
 
 ```php
 <?php
@@ -76,7 +79,7 @@ public function validateBoolean($attribute, $value)
 }
 ```
 
-You can also see that in this tests suite.
+We can also see that in this tests suite. *(the one in the middle)*
 
 ```php
 <?php
@@ -89,15 +92,15 @@ public function testValidateBoolean()
 
     $v = new Validator($trans, ['foo' => 'yes'], ['foo' => 'Boolean']);
     $this->assertFalse($v->passes());
-
-    // here
+```
+```php
     $v = new Validator($trans, ['foo' => 'false'], ['foo' => 'Boolean']);
     $this->assertFalse($v->passes());
 
-    // and here
     $v = new Validator($trans, ['foo' => 'true'], ['foo' => 'Boolean']);
     $this->assertFalse($v->passes());
-
+```
+```php
     $v = new Validator($trans, [], ['foo' => 'Boolean']);
     $this->assertTrue($v->passes());
 
@@ -126,7 +129,7 @@ public function testValidateBoolean()
 ### The first approach - use prepareForValidation method
 
 Let's start with what I think it's a more easy approach to implement, it's what Laravel calls "Preparing Input For Validation", 
-and that's done by using `prepareForValidation()` method. Like its name reveals, this method allows us to add new inputs or update existing ones, which get merged to the request before they go through validation.
+and that's done by using `prepareForValidation()` method. Like its name reveals, this method allows us to add new request inputs or update existing request inputs before going through validation rules.
 
 So in our small example, we will try to convert the `is_published` value to an actual boolean, and merge it back to the original request.
 
@@ -184,6 +187,8 @@ class PostRequest extends FormRequest
 
 
 ### The second approach - use a custom validation rule
+
+While the first approach works perfectly, 
 
 
 ### References
