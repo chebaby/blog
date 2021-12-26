@@ -15,7 +15,7 @@ You would expect, *as I did*, that this will just work out of the box and Larave
 
 To deeply understand why this is happening, let's go through an example, let's say that we have a form request that we call `PostRequest`.
 
->Form requests are custom request classes that encapsulate their own validation and authorization logic - Laravel docs.
+>Form requests are custom request classes that encapsulate their own validation and authorization logic. <br><br>-- Laravel docs.
 
 
 ```php
@@ -164,7 +164,7 @@ class PostRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'is_published' => $this->toBool($this->is_published),
+            'is_published' => $this->toBoolean($this->is_published),
         ]);
     }
 
@@ -174,7 +174,7 @@ class PostRequest extends FormRequest
      * @param $booleable
      * @return boolean
      */
-    private function toBool($booleable)
+    private function toBoolean($booleable)
     {
         return filter_var($booleable, FILTER_VALIDATE_BOOLEAN);
     }
@@ -188,11 +188,113 @@ class PostRequest extends FormRequest
 
 ### The second approach - use a custom validation rule
 
-While the first approach works perfectly, 
+While the first approach works perfectly, there is a "classy" way to validate the input as boolean, and that's by creating custom validation rules using rule objects.
 
+>Laravel provides a variety of helpful validation rules; however, you may wish to specify some of your own. One method of registering custom validation rules is using rule objects. To generate a new rule object, you may use the make:rule Artisan command. <br><br>-- Laravel docs.
+
+Let's use this command to generate a rule that verifies a string value of `true` and `false` as boolean. 
+
+>Laravel will place the new rule in the `app/Rules` directory. If this directory does not exist, Laravel will create it when you execute the Artisan command to create your rule. <br><br>-- Laravel docs.
+
+```
+php artisan make:rule Boolean
+```
+
+As promised, a `Boolean` class is created in `app/Rules` namespace, and here is what it looks like
+
+```php
+<?php
+
+namespace App\Rules;
+
+use Illuminate\Contracts\Validation\Rule;
+
+class Boolean implements Rule
+{
+    /**
+     * Create a new rule instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    /**
+     * Determine if the validation rule passes.
+     *
+     * @param  string  $attribute
+     * @param  mixed  $value
+     * @return bool
+     */
+    public function passes($attribute, $value)
+    {
+        //
+    }
+
+    /**
+     * Get the validation error message.
+     *
+     * @return string
+     */
+    public function message()
+    {
+        return 'The validation error message.';
+    }
+}
+```
+
+Once the `Boolean` rule has been created, we are ready to define its behavior. A rule object contains two methods: `passes` and `message`. The passes method receives the attribute *value* and *name*, and should return `true` or `false` depending on whether the attribute value is valid or not. The message method should return the validation error message that should be used when validation fails.
+
+#### Small turn - make global helper functions
+
+But just before doing that, it may be useful to extract `toBoolean` from before to its own function and make it available globally.
+
+An easy and efficient way of creating global functions in Laravel is to autoload it directly from Composer. The autoload section of composer accepts a `files` array that is automatically loaded.
+
+1. Create a `helpers.php` file wherever you like. I usualy keep my global helpers in `app/Support/helpers.php`.
+2. Add your your helper functions, no need to specify any namespace *(so we don't have to use `use function` to call them)*.
+    
+    ```php
+    if (!function_exists('to_boolean')) {
+    
+        /**
+         - Convert to boolean
+         *
+         - @param $booleable
+         - @return boolean
+         */
+        function to_boolean($booleable)
+        {
+            return filter_var($booleable, FILTER_VALIDATE_BOOLEAN);
+        }
+    }
+    ```
+
+3. In `composer.json` inside the `autoload` section add the following line `"files": ["app/Support/helpers.php"]`.
+    
+    ```
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        },
+        "files": ["app/Support/helpers.php"]
+    }
+    ```
+
+4. Run `composer dump-autoload`
+
+Now ower `to_boolean` function is callable anywhere in our project.
+
+
+Back to ower `Boolean` rule. 
 
 ### References
 
-* *[boolean validation does not accept "true" and "false", but accepts "1", "0"](https://github.com/laravel/ideas/issues/514){:target="_blank"}*
+* *[github.com - boolean validation does not accept "true" and "false", but accepts "1", "0"](https://github.com/laravel/ideas/issues/514){:target="_blank"}*
 * *[php.net - filter_var - user contributed notes](https://www.php.net/manual/en/function.filter-var.php#121263){:target="_blank"}*
-* *[php.net- validate filters](https://www.php.net/manual/en/filter.filters.validate.php#filter.filters.validate){:target="_blank"}*
+* *[php.net - validate filters](https://www.php.net/manual/en/filter.filters.validate.php#filter.filters.validate){:target="_blank"}*
+* *[stackoverflow.com - How do I make global helper functions in laravel](https://stackoverflow.com/a/43243743/4325011){:target="_blank"}*
