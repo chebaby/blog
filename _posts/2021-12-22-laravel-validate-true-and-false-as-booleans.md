@@ -131,7 +131,7 @@ public function testValidateBoolean()
 Let's start with what I think it's a more easy approach to implement, it's what Laravel calls "Preparing Input For Validation", 
 and that's done by using `prepareForValidation()` method. Like its name reveals, this method allows us to add new request inputs or update existing request inputs before going through validation rules.
 
-So in our small example, we will try to convert the `is_published` value to an actual boolean, and merge it back to the original request.
+So in our small example here, we will try to convert the `is_published` value to an actual boolean, and merge it back to the original request.
 
 ```php
 <?php
