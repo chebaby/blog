@@ -86,41 +86,15 @@ We can also see that in this tests suite. *(the one in the middle)*
 
 public function testValidateBoolean()
 {
-    $trans = $this->getIlluminateArrayTranslator();
-    $v = new Validator($trans, ['foo' => 'no'], ['foo' => 'Boolean']);
-    $this->assertFalse($v->passes());
+    // ...
 
-    $v = new Validator($trans, ['foo' => 'yes'], ['foo' => 'Boolean']);
-    $this->assertFalse($v->passes());
-```
-```php
     $v = new Validator($trans, ['foo' => 'false'], ['foo' => 'Boolean']);
     $this->assertFalse($v->passes());
 
     $v = new Validator($trans, ['foo' => 'true'], ['foo' => 'Boolean']);
     $this->assertFalse($v->passes());
-```
-```php
-    $v = new Validator($trans, [], ['foo' => 'Boolean']);
-    $this->assertTrue($v->passes());
 
-    $v = new Validator($trans, ['foo' => false], ['foo' => 'Boolean']);
-    $this->assertTrue($v->passes());
-
-    $v = new Validator($trans, ['foo' => true], ['foo' => 'Boolean']);
-    $this->assertTrue($v->passes());
-
-    $v = new Validator($trans, ['foo' => '1'], ['foo' => 'Boolean']);
-    $this->assertTrue($v->passes());
-
-    $v = new Validator($trans, ['foo' => 1], ['foo' => 'Boolean']);
-    $this->assertTrue($v->passes());
-
-    $v = new Validator($trans, ['foo' => '0'], ['foo' => 'Boolean']);
-    $this->assertTrue($v->passes());
-
-    $v = new Validator($trans, ['foo' => 0], ['foo' => 'Boolean']);
-    $this->assertTrue($v->passes());
+    // ...
 }
 ```
 
@@ -176,7 +150,7 @@ class PostRequest extends FormRequest
      */
     private function toBoolean($booleable)
     {
-        return filter_var($booleable, FILTER_VALIDATE_BOOLEAN);
+        return filter_var($booleable, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
     }
 }
 ```
@@ -185,6 +159,37 @@ class PostRequest extends FormRequest
 
 `FILTER_VALIDATE_BOOLEAN` returns **true** for *`'1'`*, *`'true'`*, *`'on'`* and *`'yes'`*. Returns **false** otherwise.
 
+When `FILTER_NULL_ON_FAILURE` is set, **false** is returned only for `*'0'*`, `*'false'*`, `*'off'*`, `*'no'*`, and `*''*`, and **null** is returned for all non-boolean values.
+
+Understanding how `FILTER_NULL_ON_FAILURE` flags affect the `filter_var` function is essential, especially while tackling the second approach, for that reason let me provide you with some examples to demonstrate how the `to_boolean` function behave under different use cases.
+
+
+```php
+to_boolean('1');                // true
+to_boolean('true');             // true
+to_boolean('on');               // true
+to_boolean('yes');              // true
+
+to_boolean('0');                // false
+to_boolean('false');            // false
+to_boolean('off');              // false
+to_boolean('no');               // false
+
+to_boolean('not a boolean');    // null
+```
+
+Until here it makes perfect sense, *"truthy"* booleans are `true`, *"falsy"* booleans are `false`, others are just `null`. Perfect!
+
+```php
+to_boolean('');                 // false
+```
+
+This, is where it gets interested, this last use case could really be confusing, I myself was waiting for `null` as return value, but what we get is a `boolean` *(`false` in this case)*. <br>
+This will cause a false validation, not in our example for particularly because we have a `required` validation rule, if there is an empty string, we will know that before hitting the `boolean` validation rule.
+
+I thought it was important to bring this up.
+
+With that been said, let's jump right into the second approach.
 
 ### The second approach - use a custom validation rule
 
@@ -267,7 +272,7 @@ An easy and efficient way of creating global functions in Laravel is to autoload
          */
         function to_boolean($booleable)
         {
-            return filter_var($booleable, FILTER_VALIDATE_BOOLEAN);
+            return filter_var($booleable, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
         }
     }
     ```
@@ -298,3 +303,4 @@ Back to ower `Boolean` rule.
 * *[php.net - filter_var - user contributed notes](https://www.php.net/manual/en/function.filter-var.php#121263){:target="_blank"}*
 * *[php.net - validate filters](https://www.php.net/manual/en/filter.filters.validate.php#filter.filters.validate){:target="_blank"}*
 * *[stackoverflow.com - How do I make global helper functions in laravel](https://stackoverflow.com/a/43243743/4325011){:target="_blank"}*
+* *[stackoverflow.com - The input value of false for FILTER_VALIDATE_BOOLEAN](https://stackoverflow.com/a/9115890/4325011){:target="_blank"}*
