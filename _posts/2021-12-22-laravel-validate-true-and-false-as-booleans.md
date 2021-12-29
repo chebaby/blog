@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Laravel validate true and false as booleans
+title: Laravel validate 'true' and 'false' as booleans
 share-description: I will share with you the approach I take to properly validate a form input with value the string value of 'true' or 'flase'.
 gh-repo: chebaby/blog
 gh-badge: [follow]
@@ -11,7 +11,7 @@ head-extra: article_structured_data.html
 
 
 Every once in a while you come across a situation where you need to validate a request input as a boolean, and the input value is `'true'` or `'false'` (notice that I wrapped the values inside single quotes to indicate that those are actually strings). <br>
-You would expect, *as I did*, that this will just work out of the box and Laravel validator will just see them as booleans. But that is not the case, instead, you will be hit by this beautiful error message `'The inputName field must be true or false.'`
+You would expect, *as I did*, that this will just work out of the box and Laravel validator will just see them as booleans. But that's not the case, instead, you will be hit by this beautiful error message `'The inputName field must be true or false.'`
 
 To deeply understand why this is happening, let's go through an example, let's say that we have a form request that we call `PostRequest`.
 
@@ -51,13 +51,14 @@ class PostRequest extends FormRequest
 }
 ```
 
-`PostRequest`, for simplicity purposes, has a single request input that we need to validate as boolean, we will call that `is_published`, and let's say that `is_published` value coming to us from the client is `'true'` or `'false'`. <br>
-At this point we already know that validation wouldn't pass, so, how can we handle this? 
+`PostRequest`, for simplicity purposes, has a single request input that, first, is **required**, and second, is **boolean**, and this input is named `is_published`. Let's also say that `is_published` value coming to us from the client is `'true'` or `'false'`.
+
+At this point we already know that validation wouldn't pass. So, how can we handle this? 
 
 
 ## Beforehand
 
-Laravel boolean rule doesn't validate `'true'` and `'false'` as valid booleans, we can actually see that in `validateBoolean()` method located in `Illuminate/Validation/Concerns/ValidatesAttributes`.
+Before diving in, I want to show you the logic Laravel uses to validate booleans internally, you can actually see that in `validateBoolean()` method located in `Illuminate/Validation/Concerns/ValidatesAttributes`.
 
 ```php
 <?php
@@ -79,31 +80,41 @@ public function validateBoolean($attribute, $value)
 }
 ```
 
-We can also see that in this tests suite. *(the one in the middle)*
+We can also see that in this unit tests.
 
 ```php
 <?php
 
+use Illuminate\Validation\Validator;
+
+// ...
+
 public function testValidateBoolean()
 {
+    $trans = $this->getIlluminateArrayTranslator();
+
     // ...
 
     $v = new Validator($trans, ['foo' => 'false'], ['foo' => 'Boolean']);
+
     $this->assertFalse($v->passes());
 
     $v = new Validator($trans, ['foo' => 'true'], ['foo' => 'Boolean']);
+
     $this->assertFalse($v->passes());
 
     // ...
 }
 ```
 
+<sup>Source : https://github.com/laravel/framework/blob/8.x/tests/Validation/ValidationValidatorTest.php</sup>
+
 ## Solutions
 
 ### The first approach - use prepareForValidation method
 
 Let's start with what I think it's a more easy approach to implement, it's what Laravel calls "Preparing Input For Validation", 
-and that's done by using `prepareForValidation()` method. Like its name reveals, this method allows us to add new request inputs or update existing request inputs before going through validation rules.
+and that's done by using `prepareForValidation()` method. Like its name reveals, this method allows us to add new request inputs or update existing request inputs before going through the validation rules.
 
 So in our small example here, we will try to convert the `is_published` value to an actual boolean, and merge it back to the original request.
 
@@ -159,9 +170,10 @@ class PostRequest extends FormRequest
 
 `FILTER_VALIDATE_BOOLEAN` returns **true** for *`'1'`*, *`'true'`*, *`'on'`* and *`'yes'`*. Returns **false** otherwise.
 
-When `FILTER_NULL_ON_FAILURE` is set, **false** is returned only for `*'0'*`, `*'false'*`, `*'off'*`, `*'no'*`, and `*''*`, and **null** is returned for all non-boolean values.
+When `FILTER_NULL_ON_FAILURE` flag is set, **false** is returned only for `*'0'*`, `*'false'*`, `*'off'*`, `*'no'*`, and `*''*`, and **null** is returned for all non-boolean values.
 
-Understanding how `FILTER_NULL_ON_FAILURE` flags affect the `filter_var` function is essential, especially while tackling the second approach, for that reason let me provide you with some examples to demonstrate how the `to_boolean` function behave under different use cases.
+Understanding how `FILTER_NULL_ON_FAILURE` flag affect the `filter_var` function is essential, especially while tackling the second approach as we are going to see later on. <br>
+For that reason let me provide you with some examples to demonstrate how the `to_boolean` function behave under different use cases.
 
 
 ```php
@@ -184,8 +196,9 @@ Until here it makes perfect sense, *"truthy"* booleans are `true`, *"falsy"* boo
 to_boolean('');                 // false
 ```
 
-This, is where it gets interested, this last use case could really be confusing, I myself was waiting for `null` as return value, but what we get is a `boolean` *(`false` in this case)*. <br>
-This will cause a false validation, not in our example for particularly because we have a `required` validation rule, if there is an empty string, we will know that before hitting the `boolean` validation rule.
+This, is where it gets interested, this last use case could really be confusing, I myself was waiting for `null` as a return value, but we get a `boolean` instead <sup>*(`false` in this case)*</sup>. <br>
+This will cause a **false validation**, because the empty string will be valuated as a `boolean`, which make the validation passes. <br>
+Notice that this will never be the case in our example, because we have a `required` rule, if the request input <sup>*(`is_published`)*</sup> is an empty string, the validation will fail before even hitting the `boolean` rule.
 
 I thought it was important to bring this up.
 
