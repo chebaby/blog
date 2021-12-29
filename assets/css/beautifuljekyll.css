@@ -988,6 +988,14 @@ pre {
   margin-bottom: 0;
 }
 
+.blog-post li {
+  margin: 1rem 0;
+}
+
+.blog-post li .language-php {
+  margin: 1.875rem 0;
+}
+
 .center {
   display: block;
   margin: 0 auto;

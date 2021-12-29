@@ -107,7 +107,7 @@ public function testValidateBoolean()
 }
 ```
 
-<sup>Source : https://github.com/laravel/framework/blob/8.x/tests/Validation/ValidationValidatorTest.php</sup>
+<sup class="text-muted" style="word-break: break-all;">Source : https://github.com/laravel/framework/blob/8.x/tests/Validation/ValidationValidatorTest.php</sup>
 
 ## Solutions
 
@@ -210,15 +210,16 @@ While the first approach works perfectly, there is a "classy" way to validate th
 
 >Laravel provides a variety of helpful validation rules; however, you may wish to specify some of your own. One method of registering custom validation rules is using rule objects. To generate a new rule object, you may use the make:rule Artisan command. <br><br>-- Laravel docs.
 
-Let's use this command to generate a rule that verifies a string value of `true` and `false` as boolean. 
+Let's use this command to generate a rule that verifies a string value of `true` and `false` as boolean.
+
+```php
+php artisan make:rule Boolean
+```
+<p></p>
 
 >Laravel will place the new rule in the `app/Rules` directory. If this directory does not exist, Laravel will create it when you execute the Artisan command to create your rule. <br><br>-- Laravel docs.
 
-```
-php artisan make:rule Boolean
-```
-
-As promised, a `Boolean` class is created in `app/Rules` namespace, and here is what it looks like
+As promised, a `Boolean` class is created in `app/Rules` namespace, and here is what it looks like:
 
 ```php
 <?php
@@ -267,9 +268,9 @@ Once the `Boolean` rule has been created, we are ready to define its behavior. A
 
 #### Small turn - make global helper functions
 
-But just before doing that, it may be useful to extract `toBoolean` from before to its own function and make it available globally.
+But, just before doing that, it may be useful to extract `toBoolean` from before to its own function and make it available globally.
 
-An easy and efficient way of creating global functions in Laravel is to autoload it directly from Composer. The autoload section of composer accepts a `files` array that is automatically loaded.
+An easy and efficient way of creating global functions in Laravel is to autoload it directly from **Composer**. The autoload section of composer accepts a `files` array that is automatically loaded.
 
 1. Create a `helpers.php` file wherever you like. I usualy keep my global helpers in `app/Support/helpers.php`.
 2. Add your your helper functions, no need to specify any namespace *(so we don't have to use `use function` to call them)*.
@@ -278,10 +279,10 @@ An easy and efficient way of creating global functions in Laravel is to autoload
     if (!function_exists('to_boolean')) {
     
         /**
-         - Convert to boolean
+         * Convert to boolean
          *
-         - @param $booleable
-         - @return boolean
+         * @param $booleable
+         * @return boolean
          */
         function to_boolean($booleable)
         {
@@ -305,15 +306,77 @@ An easy and efficient way of creating global functions in Laravel is to autoload
 
 4. Run `composer dump-autoload`
 
-Now ower `to_boolean` function is callable anywhere in our project.
+Now our `to_boolean` function is callable anywhere in our project.
 
 
-Back to ower `Boolean` rule. 
+Back to our `Boolean` rule.
+
+```php
+<?php
+
+namespace App\Rules;
+
+use Illuminate\Contracts\Validation\Rule;
+
+class Boolean implements Rule
+{
+    /**
+     * Determine if the validation rule passes.
+     *
+     * @param  string  $attribute
+     * @param  mixed  $value
+     * @return bool
+     */
+    public function passes($attribute, $value)
+    {
+        return is_bool(to_boolean($value));
+    }
+
+    /**
+     * Get the validation error message.
+     *
+     * @return string
+     */
+    public function message()
+    {
+        return __('validation.boolean');
+    }
+}
+```
+
+For our case we can safly remove the constructor.
+
+The `is_bool` function is a native php function, it finds out whether a variable is a boolean.
+
+The `__` function is a Laravel strings helper, it translates the given translation string or translation key using your localization files.
+
+It's almost finished, all we have to do now is update our `PostRequest` to implement the custom rule object `Boolean` like this:
+
+```php
+<?php
+
+use App\Rules\Boolean;
+    
+    // ...
+    
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'is_published' => ['required', new Boolean],
+        ];
+    }
+```
 
 ### References
 
-* *[github.com - boolean validation does not accept "true" and "false", but accepts "1", "0"](https://github.com/laravel/ideas/issues/514){:target="_blank"}*
-* *[php.net - filter_var - user contributed notes](https://www.php.net/manual/en/function.filter-var.php#121263){:target="_blank"}*
+* *[php.net - is_bool](https://www.php.net/manual/en/function.is-bool.php){:target="_blank"}*
 * *[php.net - validate filters](https://www.php.net/manual/en/filter.filters.validate.php#filter.filters.validate){:target="_blank"}*
+* *[php.net - filter_var - user contributed notes](https://www.php.net/manual/en/function.filter-var.php#121263){:target="_blank"}*
 * *[stackoverflow.com - How do I make global helper functions in laravel](https://stackoverflow.com/a/43243743/4325011){:target="_blank"}*
 * *[stackoverflow.com - The input value of false for FILTER_VALIDATE_BOOLEAN](https://stackoverflow.com/a/9115890/4325011){:target="_blank"}*
+* *[github.com - boolean validation does not accept "true" and "false", but accepts "1", "0"](https://github.com/laravel/ideas/issues/514){:target="_blank"}*
