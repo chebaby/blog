@@ -11,7 +11,7 @@ head-extra: article_structured_data.html
 
 
 Every once in a while you come across a situation where you need to validate a request input as a boolean, and the input value is `'true'` or `'false'` (notice that I wrapped the values inside single quotes to indicate that those are actually strings). <br>
-You would expect, *as I did*, that this will just work out of the box and Laravel validator will just see them as booleans. But that's not the case, instead, you will be hit by this beautiful error message `'The inputName field must be true or false.'`
+You would expect, *as I did*, that this will just work out of the box and Laravel validator will just see them as booleans. But, that's not the case, instead, you will be hit by this beautiful error message `'The inputName field must be true or false.'`
 
 To deeply understand why this is happening, let's go through an example, let's say that we have a form request that we call `PostRequest`.
 
@@ -170,34 +170,36 @@ class PostRequest extends FormRequest
 
 `FILTER_VALIDATE_BOOLEAN` returns **true** for *`'1'`*, *`'true'`*, *`'on'`* and *`'yes'`*. Returns **false** otherwise.
 
-When `FILTER_NULL_ON_FAILURE` flag is set, **false** is returned only for `*'0'*`, `*'false'*`, `*'off'*`, `*'no'*`, and `*''*`, and **null** is returned for all non-boolean values.
+When `FILTER_NULL_ON_FAILURE` flag is set, **false** is returned ONLY for *`'0'`*, *`'false'`*, *`'off'`*, *`'no'`*, and *`''`*, and **null** is returned for all non-boolean values.
 
 Understanding how `FILTER_NULL_ON_FAILURE` flag affect the `filter_var` function is essential, especially while tackling the second approach as we are going to see later on. <br>
-For that reason let me provide you with some examples to demonstrate how the `to_boolean` function behave under different use cases.
+For that reason let me provide you with some examples to demonstrate how the `toBoolean` method behave under different use cases.
 
 
 ```php
-to_boolean('1');                // true
-to_boolean('true');             // true
-to_boolean('on');               // true
-to_boolean('yes');              // true
+$this->toBoolean('1');                // true
+$this->toBoolean('true');             // true
+$this->toBoolean('on');               // true
+$this->toBoolean('yes');              // true
 
-to_boolean('0');                // false
-to_boolean('false');            // false
-to_boolean('off');              // false
-to_boolean('no');               // false
+$this->toBoolean('0');                // false
+$this->toBoolean('false');            // false
+$this->toBoolean('off');              // false
+$this->toBoolean('no');               // false
 
-to_boolean('not a boolean');    // null
+$this->toBoolean('not a boolean');    // null
 ```
 
 Until here it makes perfect sense, *"truthy"* booleans are `true`, *"falsy"* booleans are `false`, others are just `null`. Perfect!
 
 ```php
-to_boolean('');                 // false
+$this->toBoolean('');                 // false
 ```
 
-This, is where it gets interested, this last use case could really be confusing, I myself was waiting for `null` as a return value, but we get a `boolean` instead <sup>*(`false` in this case)*</sup>. <br>
-This will cause a **false validation**, because the empty string will be valuated as a `boolean`, which make the validation passes. <br>
+This, is where it gets interested, this last use case could really be confusing, I myself was waiting for `null` as a return value, but we get a `boolean` instead <sup>*(`false` in this case)*</sup>.
+
+This will cause a **false validation**, because the empty string will be valuated as a `boolean`, which make the validation passes.
+
 Notice that this will never be the case in our example, because we have a `required` rule, if the request input <sup>*(`is_published`)*</sup> is an empty string, the validation will fail before even hitting the `boolean` rule.
 
 I thought it was important to bring this up.
@@ -210,7 +212,7 @@ While the first approach works perfectly, there is a "classy" way to validate th
 
 >Laravel provides a variety of helpful validation rules; however, you may wish to specify some of your own. One method of registering custom validation rules is using rule objects. To generate a new rule object, you may use the make:rule Artisan command. <br><br>-- Laravel docs.
 
-Let's use this command to generate a rule that verifies a string value of `true` and `false` as boolean.
+Let's use this command to generate a rule that validates a string value of `true` and `false` as boolean.
 
 ```php
 php artisan make:rule Boolean
@@ -264,7 +266,8 @@ class Boolean implements Rule
 }
 ```
 
-Once the `Boolean` rule has been created, we are ready to define its behavior. A rule object contains two methods: `passes` and `message`. The passes method receives the attribute *value* and *name*, and should return `true` or `false` depending on whether the attribute value is valid or not. The message method should return the validation error message that should be used when validation fails.
+Once the `Boolean` rule has been created, we are ready to define its behavior. <br>
+A rule object contains two methods: `passes` and `message`. The passes method receives the attribute *value* and *name*, and should return `true` or `false` depending on whether the attribute value is valid or not. The message method should return the validation error message that should be used when validation fails.
 
 #### Small turn - make global helper functions
 
@@ -371,6 +374,16 @@ use App\Rules\Boolean;
         ];
     }
 ```
+
+## Conclusion
+
+Finally, our post has come to an end. So a quick recap, we have described two ways, approaches if you will, to validate `'true'` and `'false'` as boolean with Laravel validator.
+
+The first approach is preparing input for validation throughout the use of `prepareForValidation` method provided to us by `FormRequest`.
+
+The second approach is using custom validation rules, more precisely rule objects, for that we have created our own `Boolean` object to do the job.
+
+I know that I said that the first approach is easier to implement, but now that I use the rule object more often, I find it to be simpler and cleaner, the abstraction in rule object is more "developer-friendly" so to speak, the first approach is, arguably, more verbose. Either way, it's good to know them both, use whatever suits your use case or your personal preference.
 
 ### References
 
