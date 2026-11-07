@@ -49,7 +49,9 @@ layout: base
 
       <p class="open-sans">
         If you have any questions or feedback, please get in touch. 
+        {%- if site.social-network-links.twitter %}
         You can reach me on Twitter <a href="https://twitter.com/{{ site.social-network-links.twitter }}">@{{ site.social-network-links.twitter }}</a>
+        {%- endif %}
       </p>
 
       {% comment %}

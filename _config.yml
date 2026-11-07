@@ -9,7 +9,7 @@
 title: Blog
 
 # Your name to show in the footer
-author: Nour-Eddine ECH-CHEBABY
+author: Nour-Eddine Ech-Chebaby
 
 # --- List of links in the navigation bar --- #
 
@@ -39,7 +39,6 @@ round-avatar: true
 social-network-links:
   email: "contact.chebaby@gmail.com"
   github: chebaby
-  twitter: __chebaby
 #  reddit: yourname
 #  linkedin: daattali
 #  xing: yourname
